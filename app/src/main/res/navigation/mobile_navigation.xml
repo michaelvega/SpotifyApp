@@ -22,4 +22,10 @@
         android:name="com.example.spotifyapp.ui.slideshow.SlideshowFragment"
         android:label="@string/menu_slideshow"
         tools:layout="@layout/fragment_slideshow" />
+
+    <fragment
+        android:id="@+id/nav_spotify_auth"
+        android:name="com.example.spotifyapp.ui.spotifyauth.SpotifyAuthFragment"
+        android:label="Spotify Authentication"
+        tools:layout="@layout/fragment_spotify_auth" />
 </navigation>
