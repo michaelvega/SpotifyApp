@@ -24,6 +24,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.sql.SQLOutput;
+import java.util.Objects;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -72,14 +73,14 @@ public class SpotifyAuthFragment extends Fragment {
         Log.d("SpotifyAuth", "Requesting token");
         AuthorizationRequest request = getAuthenticationRequest(AuthorizationResponse.Type.TOKEN);
         Log.d("SpotifyAuth", "Opening login activity for token. Request: " + request.toString());
-        AuthorizationClient.openLoginActivity(getActivity(), AUTH_TOKEN_REQUEST_CODE, request);
+        AuthorizationClient.openLoginActivity(requireActivity(), AUTH_TOKEN_REQUEST_CODE, request);
     }
 
     private void getCode() {
         Log.d("SpotifyAuth", "Requesting code");
         AuthorizationRequest request = getAuthenticationRequest(AuthorizationResponse.Type.CODE);
         Log.d("SpotifyAuth", "Opening login activity for code. Request: " + request.toString());
-        AuthorizationClient.openLoginActivity(getActivity(), AUTH_CODE_REQUEST_CODE, request);
+        AuthorizationClient.openLoginActivity(requireActivity(), AUTH_CODE_REQUEST_CODE, request);
     }
 
     @Override
