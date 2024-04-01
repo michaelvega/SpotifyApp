@@ -30,7 +30,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class login extends AppCompatActivity {
+public class login extends BaseActivity {
 
     public static final String CLIENT_ID = "66543f1060f94bde954afafe1e5ce2ae";
     public static final String REDIRECT_URI = "spotifyapp://auth";
@@ -49,36 +49,7 @@ public class login extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
 
-
-        NavigationView navigationView = findViewById(R.id.nav_view);
-
-        DrawerLayout drawer = findViewById(R.id.drawer_view);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar,
-                R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
-
-        //mirrors mainactivity but with directionals flipped
-        //TODO: consolidate this logic as well as the drawer layout if possible
-        navigationView.setNavigationItemSelectedListener(item -> {
-            if (item.getItemId() == R.id.login_item) {// Handle navigation
-                drawer.closeDrawer(GravityCompat.START);
-                return true;
-            } else if (item.getItemId() == R.id.home_item) {
-
-                Intent intent = new Intent(login.this, MainActivity.class);
-                startActivity(intent);
-
-                drawer.closeDrawer(GravityCompat.START);
-                return true;
-            }
-            return false;
-        });
-
+        initializeDrawer();
 
 
         // Initialize the views

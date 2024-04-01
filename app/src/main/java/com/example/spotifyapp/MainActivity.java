@@ -16,7 +16,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
     private DrawerLayout drawer;
 
@@ -25,35 +25,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        drawer = findViewById(R.id.drawer_view);
-        NavigationView navigationView = findViewById(R.id.nav_view);
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
-
-        // Setup drawer view
-        navigationView.setNavigationItemSelectedListener(item -> {
-            if (item.getItemId() == R.id.login_item) {// Handle navigation
-                Intent intent = new Intent(MainActivity.this, login.class);
-                startActivity(intent);
-
-                drawer.closeDrawer(GravityCompat.START);
-                return true;
-            } else if (item.getItemId() == R.id.home_item) {
-                drawer.closeDrawer(GravityCompat.START);
-                return true;
-            }
-            return false;
-        });
-
-
+        initializeDrawer();
 
     }
 
+    /**
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             drawer.openDrawer(GravityCompat.START);
@@ -61,4 +37,5 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+     **/
 }
