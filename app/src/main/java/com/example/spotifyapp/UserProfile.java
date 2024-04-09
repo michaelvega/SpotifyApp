@@ -9,14 +9,17 @@ public class UserProfile {
     private String spotifyEmail;
     private String topTracksJsonString; //now a string
 
+    private int lastUpdatedYear;
+
     public UserProfile() {} // Empty constructor needed for Firestore
 
-    public UserProfile(String accessToken, String accessCode, String profileInfo, String spotifyEmail, String topTracksJsonString) {
+    public UserProfile(String accessToken, String accessCode, String profileInfo, String spotifyEmail, String topTracksJsonString, int lastUpdatedYear) {
         this.accessToken = accessToken;
         this.accessCode = accessCode;
         this.profileInfo = profileInfo;
         this.spotifyEmail = spotifyEmail;
         this.topTracksJsonString = topTracksJsonString;
+        this.lastUpdatedYear = lastUpdatedYear;
     }
 
     // Getters and setters
@@ -58,5 +61,13 @@ public class UserProfile {
 
     public void setTopTracksJsonString(String topTracksJsonString) {
         this.topTracksJsonString = topTracksJsonString;
+    }
+
+    public int getlastUpdatedYear() {
+        return lastUpdatedYear;
+    }
+
+    public void setLastUpdatedYear(int lastUpdatedYear) {
+        this.lastUpdatedYear = lastUpdatedYear;
     }
 }

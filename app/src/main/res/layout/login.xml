@@ -33,6 +33,13 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/toolbar">
 
+                <Button
+                    android:id="@+id/save_to_firestore_btn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:text="Sync Spotify Account" />
+
                 <TextView
                     android:id="@+id/token_text_view"
                     android:layout_width="match_parent"
@@ -81,13 +88,6 @@
                         android:layout_weight="1"
                         android:text="Get User Profile" />
                 </LinearLayout>
-
-                <Button
-                    android:id="@+id/save_to_firestore_btn"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:text="Sync Spotify Account" />
 
                 <Button
                     android:id="@+id/music_listening_btn"

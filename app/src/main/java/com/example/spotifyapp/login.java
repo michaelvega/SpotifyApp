@@ -16,6 +16,8 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.WriteBatch;
 import com.spotify.sdk.android.auth.AuthorizationClient;
 import com.spotify.sdk.android.auth.AuthorizationRequest;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
@@ -26,6 +28,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -262,15 +265,20 @@ public class login extends BaseActivity {
 
         UserProfile userProfile = null;
 
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+
         try {
-            userProfile = new UserProfile(mAccessToken, mAccessCode, profileTextView.getText().toString(), spotifyEmail, topTracksJsonString);
+            userProfile = new UserProfile(mAccessToken, mAccessCode, profileTextView.getText().toString(), spotifyEmail, topTracksJsonString, year);
         } catch (Exception e) {
             // Toast.makeText(this, "A field is incomplete or sync failed", Toast.LENGTH_SHORT).show();
             Log.w("error code: ", e);
             return;
         }
 
-
+        Map<String, Object> yearlyInfo = new HashMap<>();
+        yearlyInfo.put("topTracks", topTracksJsonString); // Saving as a JSON string
+        yearlyInfo.put("year", year); // Adding the year field
 
         // Get an instance of the Firestore database
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -278,11 +286,19 @@ public class login extends BaseActivity {
         FirebaseUser user = mAuth.getCurrentUser();
         String userId = user.getUid();
 
+        DocumentReference userProfileRef = db.collection("users").document(userId);
+        DocumentReference yearlyTopTracksRef = userProfileRef.collection("yearlyTopTracks").document(String.valueOf(year));
+
+
+        WriteBatch batch = db.batch();
+        batch.set(userProfileRef, userProfile); // Update the user profile
+        batch.set(yearlyTopTracksRef, yearlyInfo); // Add or update the yearly top tracks
+
+
         if ( userProfile.getAccessToken() != null && userProfile.getAccessCode() != null && userProfile.getProfileInfo() != null && userProfile.getSpotifyEmail() != null && userProfile.getTopTracksJsonString() != null){
             // Get or create a "users" collection in your Firestore database
             // Use a unique identifier for each user document, here I'm using the access code but you might want to use something like Firebase Authentication UID
-            db.collection("users").document(userId)
-                    .set(userProfile)
+            batch.commit()
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
