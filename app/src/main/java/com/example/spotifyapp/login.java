@@ -1,11 +1,6 @@
 package com.example.spotifyapp;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.os.Bundle;
 import android.content.Intent;
@@ -18,7 +13,6 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.spotify.sdk.android.auth.AuthorizationClient;
@@ -55,6 +49,9 @@ public class login extends BaseActivity {
 
     private TextView tokenTextView, codeTextView, profileTextView;
 
+    private TextView musicListeningText;
+    private Button musicListeningBtn;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,6 +71,15 @@ public class login extends BaseActivity {
         Button tokenBtn = (Button) findViewById(R.id.token_btn);
         Button codeBtn = (Button) findViewById(R.id.code_btn);
         Button profileBtn = (Button) findViewById(R.id.profile_btn);
+        musicListeningText = findViewById(R.id.music_listening_text);
+        musicListeningBtn = findViewById(R.id.music_listening_btn);
+
+        musicListeningBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                fetchMusicListeningHabits();
+            }
+        });
 
         Button saveToFirestoreBtn = findViewById(R.id.save_to_firestore_btn);
         saveToFirestoreBtn.setOnClickListener(new View.OnClickListener() {
@@ -134,6 +140,7 @@ public class login extends BaseActivity {
         // Check which request code is present (if any)
         if (AUTH_TOKEN_REQUEST_CODE == requestCode) {
             mAccessToken = response.getAccessToken();
+            Log.d("access token", mAccessToken);
             setTextAsync(mAccessToken, tokenTextView);
 
         } else if (AUTH_CODE_REQUEST_CODE == requestCode) {
@@ -182,6 +189,55 @@ public class login extends BaseActivity {
             }
         });
     }
+
+    private void fetchMusicListeningHabits() {
+        // Here, we'll pretend we're fetching "Top Tracks" as an example
+        // You would replace this with the actual data fetching and analysis logic
+        if (mAccessToken == null) {
+            Toast.makeText(this, "Access Token not available", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        final Request request = new Request.Builder()
+                .url("https://api.spotify.com/v1/me/top/tracks")
+                .addHeader("Authorization", "Bearer " + mAccessToken)
+                .build();
+
+        mOkHttpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.e("Spotify API", "Failed to fetch top tracks", e);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    final String responseBody = response.body().string();
+                    Log.d("top tracks", responseBody);
+
+                    try {
+                        // Parse the raw JSON string into a JSONObject
+                        JSONObject jsonObject = new JSONObject(responseBody);
+
+                        // Convert the JSONObject back into a string with indentation (for readability)
+                        String humanReadableJSON = jsonObject.toString(4); // Argument is the number of spaces to indent
+
+                        // Update the TextView with the formatted JSON string
+                        setTextAsync(humanReadableJSON, musicListeningText);
+                    } catch (JSONException e) {
+                        Log.e("JSON parsing", "Failed to parse JSON", e);
+                        // Handle the error gracefully, perhaps show an error message to the user
+                        setTextAsync("Failed to parse JSON data. Check logs for details.", musicListeningText);
+                    }
+                } else {
+                    Log.e("HTTP error", "Server responded with error");
+                    // Handle HTTP error, perhaps show an error message to the user
+                    setTextAsync("Failed to fetch data. Server responded with error.", musicListeningText);
+                }
+            }
+        });
+    }
+
 
     private void saveUserProfileToFirestore() {
         // Create an instance of the UserProfile model with your data
@@ -232,7 +288,7 @@ public class login extends BaseActivity {
     private AuthorizationRequest getAuthenticationRequest(AuthorizationResponse.Type type) {
         return new AuthorizationRequest.Builder(CLIENT_ID, type, getRedirectUri().toString())
                 .setShowDialog(false)
-                .setScopes(new String[] { "user-read-email" }) // <--- Change the scope of your requested token here
+                .setScopes(new String[] { "user-read-email", "user-top-read" }) // <--- Change the scope of your requested token here
                 .setCampaign("your-campaign-token")
                 .build();
     }
