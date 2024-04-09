@@ -5,7 +5,7 @@
     android:id="@+id/drawer_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".portal">
+    tools:context=".SignUp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -20,7 +20,7 @@
 
         <!-- Your content layout here, e.g., a FrameLayout for fragment -->
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/portal"
+            android:id="@+id/sign_up"
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintTop_toBottomOf="@id/toolbar"
@@ -53,10 +53,10 @@
                 app:layout_constraintWidth_percent="0.8"/>
 
             <Button
-                android:id="@+id/login_button"
+                android:id="@+id/sign_up_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/login_button_text"
+                android:text="@string/sign_up_button_text"
                 app:layout_constraintTop_toBottomOf="@id/password"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"

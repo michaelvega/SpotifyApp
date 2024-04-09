@@ -49,10 +49,15 @@ public abstract class BaseActivity extends AppCompatActivity {
             } else if (itemId == R.id.portal_item && !(this instanceof portal)) {
                 Intent intent = new Intent(this, portal.class);
                 startActivity(intent);
+            } else if (itemId == R.id.sign_up_item && !(this instanceof SignUp)) {
+                Intent intent = new Intent(this, SignUp.class);
+                startActivity(intent);
             }
+
             if ((itemId == R.id.login_item && !(this instanceof login)) ||
                     (itemId == R.id.home_item && !(this instanceof MainActivity))
-                    || (itemId == R.id.portal_item && !(this instanceof portal)) ) {
+                    || (itemId == R.id.portal_item && !(this instanceof portal))
+                    || (itemId == R.id.sign_up_item && !(this instanceof SignUp)) ) {
                 drawer.closeDrawer(GravityCompat.START);
             }
             return true;

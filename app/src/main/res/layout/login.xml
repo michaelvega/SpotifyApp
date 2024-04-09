@@ -76,6 +76,14 @@
                     android:layout_weight="1"
                     android:text="Get User Profile" />
             </LinearLayout>
+
+            <Button
+                android:id="@+id/save_to_firestore_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:text="Sync Spotify Account" />
+
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

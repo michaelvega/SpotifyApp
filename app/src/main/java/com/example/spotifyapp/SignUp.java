@@ -10,19 +10,16 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 
 
-public class portal extends BaseActivity {
+public class SignUp extends BaseActivity {
 
     private EditText usernameEditText;
     private EditText passwordEditText;
-    private Button loginButton;
+    private Button signUpButton;
 
     private Button signOutButton;
     private FirebaseAuth mAuth;
@@ -30,7 +27,7 @@ public class portal extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.portal);
+        setContentView(R.layout.sign_up);
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -41,10 +38,10 @@ public class portal extends BaseActivity {
     private void setupLoginForm() {
         usernameEditText = findViewById(R.id.username);
         passwordEditText = findViewById(R.id.password);
-        loginButton = findViewById(R.id.login_button);
+        signUpButton = findViewById(R.id.sign_up_button);
         signOutButton = findViewById(R.id.signout_button);
 
-        loginButton.setOnClickListener(new View.OnClickListener() {
+        signUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Implement your login logic here
@@ -55,9 +52,9 @@ public class portal extends BaseActivity {
                 if (!username.isEmpty() && !password.isEmpty()) {
                     Log.d("username", username);
                     Log.d("password", password);
-                    signIn(username, password);
+                    signUp(username, password);
                 } else {
-                    Toast.makeText(portal.this, "Please enter both email and password.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SignUp.this, "Please enter both email and password.", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -71,18 +68,20 @@ public class portal extends BaseActivity {
         });
     }
 
-    private void signIn(String email, String password) {
-        mAuth.signInWithEmailAndPassword(email, password)
+    private void signUp(String email, String password) {
+        mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         // Sign in success, update UI with the signed-in user's information
                         Log.d("SignIn", "signInWithEmail:success");
                         FirebaseUser user = mAuth.getCurrentUser();
                         updateUI(user);
+                        Toast.makeText(SignUp.this, "Registration successful.",
+                                Toast.LENGTH_SHORT).show();
                     } else {
                         // If sign in fails, display a message to the user.
-                        Log.w("SignIn", "signInWithEmail:failure", task.getException());
-                        Toast.makeText(portal.this, "Authentication failed.",
+                        Log.w("SignUp", "createUserWithEmail:failure", task.getException());
+                        Toast.makeText(SignUp.this, "Registration failed.",
                                 Toast.LENGTH_SHORT).show();
                         updateUI(null);
                     }
@@ -95,12 +94,12 @@ public class portal extends BaseActivity {
             // Intent to start your new activity
 
             String userId = user.getUid();
-            Toast.makeText(portal.this, "Your user ID is: " + userId,
+            Toast.makeText(SignUp.this, "Your user ID is: " + userId,
                     Toast.LENGTH_SHORT).show();
             Log.d("userid", userId);
         } else {
 
-            Toast.makeText(portal.this, "Signed Out",
+            Toast.makeText(SignUp.this, "Signed Out",
                     Toast.LENGTH_SHORT).show();
             Log.w("login", "signed out");
 

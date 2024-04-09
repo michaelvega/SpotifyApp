@@ -1,5 +1,6 @@
 package com.example.spotifyapp;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -10,11 +11,16 @@ import android.os.Bundle;
 import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.spotify.sdk.android.auth.AuthorizationClient;
 import com.spotify.sdk.android.auth.AuthorizationRequest;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
@@ -30,6 +36,9 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+import com.google.firebase.firestore.FirebaseFirestore;
+
+
 public class login extends BaseActivity {
 
     public static final String CLIENT_ID = "66543f1060f94bde954afafe1e5ce2ae";
@@ -42,12 +51,16 @@ public class login extends BaseActivity {
     private String mAccessToken, mAccessCode;
     private Call mCall;
 
+    private FirebaseAuth mAuth;
+
     private TextView tokenTextView, codeTextView, profileTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
+
+        mAuth = FirebaseAuth.getInstance();
 
         initializeDrawer();
 
@@ -61,6 +74,14 @@ public class login extends BaseActivity {
         Button tokenBtn = (Button) findViewById(R.id.token_btn);
         Button codeBtn = (Button) findViewById(R.id.code_btn);
         Button profileBtn = (Button) findViewById(R.id.profile_btn);
+
+        Button saveToFirestoreBtn = findViewById(R.id.save_to_firestore_btn);
+        saveToFirestoreBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                saveUserProfileToFirestore();
+            }
+        });
 
         // Set the click listeners for the buttons
 
@@ -160,6 +181,35 @@ public class login extends BaseActivity {
                 }
             }
         });
+    }
+
+    private void saveUserProfileToFirestore() {
+        // Create an instance of the UserProfile model with your data
+        UserProfile userProfile = new UserProfile(mAccessToken, mAccessCode, profileTextView.getText().toString());
+
+        // Get an instance of the Firestore database
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        FirebaseUser user = mAuth.getCurrentUser();
+        String userId = user.getUid();
+
+        // Get or create a "users" collection in your Firestore database
+        // Use a unique identifier for each user document, here I'm using the access code but you might want to use something like Firebase Authentication UID
+        db.collection("users").document(userId)
+                .set(userProfile)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Toast.makeText(login.this, "User profile saved successfully", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(login.this, "Error saving user profile", Toast.LENGTH_SHORT).show();
+                        Log.d("Firestore", "Error adding document", e);
+                    }
+                });
     }
 
     /**
