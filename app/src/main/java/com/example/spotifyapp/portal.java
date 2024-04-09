@@ -1,24 +1,13 @@
 package com.example.spotifyapp;
 
-import com.google.android.material.navigation.NavigationView;
 
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import com.google.android.material.navigation.NavigationView;
-
-
-import android.content.Intent;
 import android.os.Bundle;
 
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 
 public class portal extends BaseActivity {
@@ -45,13 +34,15 @@ public class portal extends BaseActivity {
             @Override
             public void onClick(View v) {
                 // Implement your login logic here
-                String username = usernameEditText.getText().toString();
+                String email = usernameEditText.getText().toString();
                 String password = passwordEditText.getText().toString();
 
                 // For demonstration purposes. Replace with actual authentication logic.
-                if (!username.isEmpty() && !password.isEmpty()) {
-                    Log.d("username", username);
+                if (!email.isEmpty() && !password.isEmpty()) {
+                    Log.d("email", email);
                     Log.d("password", password);
+                } else {
+                    Toast.makeText(portal.this, "Please enter both email and password.", Toast.LENGTH_SHORT).show();
                 }
             }
         });
