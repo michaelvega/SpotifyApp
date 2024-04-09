@@ -1,16 +1,22 @@
 package com.example.spotifyapp;
 
+
 public class UserProfile {
     private String accessToken;
     private String accessCode;
     private String profileInfo; // This could be a JSON string or a more structured object depending on your needs
 
+    private String spotifyEmail;
+    private String topTracksJsonString; //now a string
+
     public UserProfile() {} // Empty constructor needed for Firestore
 
-    public UserProfile(String accessToken, String accessCode, String profileInfo) {
+    public UserProfile(String accessToken, String accessCode, String profileInfo, String spotifyEmail, String topTracksJsonString) {
         this.accessToken = accessToken;
         this.accessCode = accessCode;
         this.profileInfo = profileInfo;
+        this.spotifyEmail = spotifyEmail;
+        this.topTracksJsonString = topTracksJsonString;
     }
 
     // Getters and setters
@@ -36,5 +42,21 @@ public class UserProfile {
 
     public void setProfileInfo(String profileInfo) {
         this.profileInfo = profileInfo;
+    }
+
+    public String getSpotifyEmail() {
+        return spotifyEmail;
+    }
+
+    public void setSpotifyEmail(String spotifyEmail) {
+        this.spotifyEmail = spotifyEmail;
+    }
+
+    public String getTopTracksJsonString() {
+        return topTracksJsonString;
+    }
+
+    public void setTopTracksJsonString(String topTracksJsonString) {
+        this.topTracksJsonString = topTracksJsonString;
     }
 }

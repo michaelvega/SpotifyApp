@@ -2,6 +2,7 @@ package com.example.spotifyapp;
 
 import androidx.annotation.NonNull;
 
+
 import android.os.Bundle;
 import android.content.Intent;
 import android.net.Uri;
@@ -19,10 +20,18 @@ import com.spotify.sdk.android.auth.AuthorizationClient;
 import com.spotify.sdk.android.auth.AuthorizationRequest;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import org.json.JSONObject;
+import java.util.HashMap;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -43,6 +52,12 @@ public class login extends BaseActivity {
 
     private final OkHttpClient mOkHttpClient = new OkHttpClient();
     private String mAccessToken, mAccessCode;
+
+    private String spotifyEmail;
+
+    private JSONObject topTracksJson;
+
+    private String topTracksJsonString;
     private Call mCall;
 
     private FirebaseAuth mAuth;
@@ -180,7 +195,10 @@ public class login extends BaseActivity {
             public void onResponse(Call call, Response response) throws IOException {
                 try {
                     final JSONObject jsonObject = new JSONObject(response.body().string());
-                    setTextAsync(jsonObject.toString(3), profileTextView);
+                    spotifyEmail = jsonObject.optString("email", "No spotifyEmail found");
+                    final String humanReadableJSON = jsonObject.toString(4);
+                    setTextAsync("Email: " + spotifyEmail + "\n\nData: " + humanReadableJSON, profileTextView);
+                    setTextAsync(humanReadableJSON, profileTextView);
                 } catch (JSONException e) {
                     Log.d("JSON", "Failed to parse data: " + e);
                     Toast.makeText(login.this, "Failed to parse data, watch Logcat for more details",
@@ -217,13 +235,13 @@ public class login extends BaseActivity {
 
                     try {
                         // Parse the raw JSON string into a JSONObject
-                        JSONObject jsonObject = new JSONObject(responseBody);
+                        topTracksJson = new JSONObject(responseBody);
 
                         // Convert the JSONObject back into a string with indentation (for readability)
-                        String humanReadableJSON = jsonObject.toString(4); // Argument is the number of spaces to indent
+                        topTracksJsonString = topTracksJson.toString(4); // Argument is the number of spaces to indent
 
                         // Update the TextView with the formatted JSON string
-                        setTextAsync(humanReadableJSON, musicListeningText);
+                        setTextAsync(topTracksJsonString, musicListeningText);
                     } catch (JSONException e) {
                         Log.e("JSON parsing", "Failed to parse JSON", e);
                         // Handle the error gracefully, perhaps show an error message to the user
@@ -241,7 +259,18 @@ public class login extends BaseActivity {
 
     private void saveUserProfileToFirestore() {
         // Create an instance of the UserProfile model with your data
-        UserProfile userProfile = new UserProfile(mAccessToken, mAccessCode, profileTextView.getText().toString());
+
+        UserProfile userProfile = null;
+
+        try {
+            userProfile = new UserProfile(mAccessToken, mAccessCode, profileTextView.getText().toString(), spotifyEmail, topTracksJsonString);
+        } catch (Exception e) {
+            // Toast.makeText(this, "A field is incomplete or sync failed", Toast.LENGTH_SHORT).show();
+            Log.w("error code: ", e);
+            return;
+        }
+
+
 
         // Get an instance of the Firestore database
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -249,23 +278,30 @@ public class login extends BaseActivity {
         FirebaseUser user = mAuth.getCurrentUser();
         String userId = user.getUid();
 
-        // Get or create a "users" collection in your Firestore database
-        // Use a unique identifier for each user document, here I'm using the access code but you might want to use something like Firebase Authentication UID
-        db.collection("users").document(userId)
-                .set(userProfile)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Toast.makeText(login.this, "User profile saved successfully", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(login.this, "Error saving user profile", Toast.LENGTH_SHORT).show();
-                        Log.d("Firestore", "Error adding document", e);
-                    }
-                });
+        if ( userProfile.getAccessToken() != null && userProfile.getAccessCode() != null && userProfile.getProfileInfo() != null && userProfile.getSpotifyEmail() != null && userProfile.getTopTracksJsonString() != null){
+            // Get or create a "users" collection in your Firestore database
+            // Use a unique identifier for each user document, here I'm using the access code but you might want to use something like Firebase Authentication UID
+            db.collection("users").document(userId)
+                    .set(userProfile)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Toast.makeText(login.this, "User profile saved successfully", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(login.this, "Error saving user profile", Toast.LENGTH_SHORT).show();
+                            Log.d("Firestore", "Error adding document", e);
+                        }
+                    });
+        } else {
+            Toast.makeText(this, "A field is incomplete or sync failed, try again", Toast.LENGTH_SHORT).show();
+            Log.d("sync failed", "A field is incomplete or sync failed");
+            return;
+        }
+
     }
 
     /**
