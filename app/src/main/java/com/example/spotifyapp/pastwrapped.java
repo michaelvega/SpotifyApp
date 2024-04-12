@@ -18,6 +18,9 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.spotify.android.appremote.api.ConnectionParams;
+import com.spotify.android.appremote.api.Connector;
+import com.spotify.android.appremote.api.SpotifyAppRemote;
 import com.spotify.sdk.android.auth.AuthorizationClient;
 import com.spotify.sdk.android.auth.AuthorizationRequest;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
@@ -43,6 +46,8 @@ public class pastwrapped extends BaseActivity {
     private TextView songName1, songName2, songName3;
     private Button playButton1, playButton2, playButton3;
     private FirebaseFirestore db = FirebaseFirestore.getInstance(); // Initialize Firestore instance
+
+    private SpotifyAppRemote mSpotifyAppRemote;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -179,10 +184,37 @@ public class pastwrapped extends BaseActivity {
     }
 
     private void playSong(String uri) {
-        // Implement the logic to play the song using Spotify SDK or an Intent if possible
-        Log.d("PlaySong", "Playing song URI: " + uri);
-        // ADD PLAY HERE
-        // For example, to open in Spotify app:
+        // Set the connection parameters
+        ConnectionParams connectionParams =
+                new ConnectionParams.Builder(CLIENT_ID)
+                        .setRedirectUri(REDIRECT_URI)
+                        .showAuthView(true)
+                        .build();
 
+        SpotifyAppRemote.connect(this, connectionParams, new Connector.ConnectionListener() {
+
+            @Override
+            public void onConnected(SpotifyAppRemote spotifyAppRemote) {
+                mSpotifyAppRemote = spotifyAppRemote;
+                Log.d("MainActivity", "Connected! Yay!");
+
+                // Now you can start playing a track
+                mSpotifyAppRemote.getPlayerApi().play(uri);
+            }
+
+            @Override
+            public void onFailure(Throwable throwable) {
+                Log.e("MainActivity", throwable.getMessage(), throwable);
+
+                // Something went wrong when attempting to connect! Handle errors here
+            }
+        });
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // Disconnect from the Spotify app remote when the activity stops
+        SpotifyAppRemote.disconnect(mSpotifyAppRemote);
     }
 }
