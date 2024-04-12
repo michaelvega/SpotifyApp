@@ -221,7 +221,7 @@ public class login extends BaseActivity {
         }
 
         final Request request = new Request.Builder()
-                .url("https://api.spotify.com/v1/me/top/tracks?fields=items(name,album(name,href),artists(name,href))")
+                .url("https://api.spotify.com/v1/me/top/tracks?fields=items(uri,name,album(name,href),artists(name,href))")
                 .addHeader("Authorization", "Bearer " + getmAccessToken())
                 .build();
 
