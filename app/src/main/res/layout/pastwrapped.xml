@@ -5,7 +5,7 @@
     android:id="@+id/drawer_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".wrapped">
+    tools:context=".pastwrapped">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -20,24 +20,70 @@
 
         <!-- Your content layout here, e.g., a FrameLayout for fragment -->
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/wrapped"
+            android:id="@+id/pastwrapped"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:background="@drawable/gradient_background"
             app:layout_constraintTop_toBottomOf="@id/toolbar"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            tools:context=".wrapped">
+            tools:context=".pastwrapped">
 
             <TextView
+                android:id="@+id/title_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="Past Wrapped"
+                android:text="Your Top Songs"
+                android:textSize="34sp"
+                app:layout_constraintBottom_toTopOf="@+id/monthbutton"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/imageView"
+                app:layout_constraintVertical_bias="0.358" />
+
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="236dp"
+                android:layout_height="256dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.075"
+                app:srcCompat="@drawable/ic_launcher_background" />
+
+            <Button
+                android:id="@+id/yearbutton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1 Year"
+                android:layout_marginStart="8dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/title_text"
+                app:layout_constraintBottom_toBottomOf="@+id/monthbutton" />
+
+            <Button
+                android:id="@+id/monthbutton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="6 Months"
+                app:layout_constraintStart_toEndOf="@id/yearbutton"
+                app:layout_constraintEnd_toStartOf="@id/weekbutton"
+                app:layout_constraintTop_toBottomOf="@+id/title_text"
+                app:layout_constraintBottom_toBottomOf="@+id/yearbutton"
+                app:layout_constraintHorizontal_bias="0.5" />
+
+            <Button
+                android:id="@+id/weekbutton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="4 Weeks"
+                android:layout_marginEnd="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/title_text"
+                app:layout_constraintBottom_toBottomOf="@+id/monthbutton" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
