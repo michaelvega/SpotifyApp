@@ -23,6 +23,11 @@
             android:id="@+id/llm_item"
             android:icon="@drawable/ic_launcher_background"
             android:title="@string/llm" />
+
+        <item
+            android:id="@+id/wrapped_item"
+            android:icon="@drawable/ic_launcher_background"
+            android:title="@string/wrapped" />
         <!-- Add more items as needed -->
     </group>
 </menu>
