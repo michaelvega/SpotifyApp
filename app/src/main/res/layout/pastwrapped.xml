@@ -136,6 +136,11 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Play" />
+                    <Button
+                        android:id="@+id/pauseButton3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Pause" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -167,6 +172,11 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Play" />
+                    <Button
+                        android:id="@+id/pauseButton2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Pause" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -198,6 +208,11 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Play" />
+                    <Button
+                        android:id="@+id/pauseButton1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Pause" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 

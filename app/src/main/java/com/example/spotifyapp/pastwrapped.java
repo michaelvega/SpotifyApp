@@ -45,9 +45,12 @@ public class pastwrapped extends BaseActivity {
 
     private TextView songName1, songName2, songName3;
     private Button playButton1, playButton2, playButton3;
+    private Button pauseButton1, pauseButton2, pauseButton3;
     private FirebaseFirestore db = FirebaseFirestore.getInstance(); // Initialize Firestore instance
 
     private SpotifyAppRemote mSpotifyAppRemote;
+
+    private boolean isPlaying = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +65,10 @@ public class pastwrapped extends BaseActivity {
         playButton1 = findViewById(R.id.playButton1);
         playButton2 = findViewById(R.id.playButton2);
         playButton3 = findViewById(R.id.playButton3);
+        pauseButton1 = findViewById(R.id.pauseButton1);
+        pauseButton2 = findViewById(R.id.pauseButton2);
+        pauseButton3 = findViewById(R.id.pauseButton3);
+
 
         // Initialize the year button and set an OnClickListener
         Button yearButton = findViewById(R.id.yearbutton);
@@ -157,13 +164,16 @@ public class pastwrapped extends BaseActivity {
                                 // Update UI for each card with the track name and set up play button
                                 if (i == 0) {
                                     songName1.setText(name);
-                                    playButton1.setOnClickListener(view -> playSong(uri));
+                                    playButton1.setOnClickListener(view -> playSong(uri, 0));
+                                    pauseButton1.setOnClickListener(view -> pauseMusic(0));
                                 } else if (i == 1) {
                                     songName2.setText(name);
-                                    playButton2.setOnClickListener(view -> playSong(uri));
+                                    playButton2.setOnClickListener(view -> playSong(uri, 1));
+                                    pauseButton2.setOnClickListener(view -> pauseMusic(1));
                                 } else if (i == 2) {
                                     songName3.setText(name);
-                                    playButton3.setOnClickListener(view -> playSong(uri));
+                                    playButton3.setOnClickListener(view -> playSong(uri, 2));
+                                    pauseButton3.setOnClickListener(view -> pauseMusic(2));
                                 }
                             }
                         } catch (JSONException e) {
@@ -183,7 +193,7 @@ public class pastwrapped extends BaseActivity {
         });
     }
 
-    private void playSong(String uri) {
+    private void playSong(String uri , int btnNum) {
         // Set the connection parameters
         ConnectionParams connectionParams =
                 new ConnectionParams.Builder(CLIENT_ID)
@@ -200,6 +210,17 @@ public class pastwrapped extends BaseActivity {
 
                 // Now you can start playing a track
                 mSpotifyAppRemote.getPlayerApi().play(uri);
+                isPlaying = true;
+                if (btnNum == 0) {
+                    pauseButton2.setText("Pause");
+                    pauseButton3.setText("Pause");
+                } else if (btnNum == 1) {
+                    pauseButton1.setText("Pause");
+                    pauseButton3.setText("Pause");
+                } else if (btnNum == 2) {
+                    pauseButton1.setText("Pause");
+                    pauseButton2.setText("Pause");
+                }
             }
 
             @Override
@@ -209,6 +230,46 @@ public class pastwrapped extends BaseActivity {
                 // Something went wrong when attempting to connect! Handle errors here
             }
         });
+    }
+
+    private void pauseMusic(int btnNum) {
+        if (isPlaying) {
+            mSpotifyAppRemote.getPlayerApi().pause().setResultCallback(empty -> {
+                Log.d("SpotifyControl", "Music paused");
+
+                if (btnNum == 0) {
+                    pauseButton1.setText("Resume");
+                } else if (btnNum == 1) {
+                    pauseButton2.setText("Resume");
+                } else if (btnNum == 2) {
+                    pauseButton3.setText("Resume");
+                }
+
+                isPlaying = false;
+
+            }).setErrorCallback(throwable -> {
+                Log.e("SpotifyControl", "Could not pause music", throwable);
+                // Handle error
+                Toast.makeText(this, "Failed to pause music", Toast.LENGTH_SHORT).show();
+            });
+        } else {
+            mSpotifyAppRemote.getPlayerApi().resume().setResultCallback(empty -> {
+                Log.d("SpotifyActivity", "Music resumed");
+                isPlaying = true;
+                if (btnNum == 0) {
+                    pauseButton1.setText("Pause");
+                } else if (btnNum == 1) {
+                    pauseButton2.setText("Pause");
+                } else if (btnNum == 2) {
+                    pauseButton3.setText("Pause");
+                }
+
+            }).setErrorCallback(throwable -> {
+                Log.e("SpotifyActivity", "Could not resume music", throwable);
+                Toast.makeText(this, "Failed to resume music", Toast.LENGTH_SHORT).show();
+            });
+        }
+
     }
 
     @Override
