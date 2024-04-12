@@ -18,6 +18,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.api.SystemParameterOrBuilder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.theokanning.openai.completion.CompletionChoice;
 import com.theokanning.openai.completion.CompletionRequest;
 import com.theokanning.openai.service.OpenAiService;
@@ -33,6 +36,10 @@ public class llm extends BaseActivity {
 
     private final OkHttpClient mOkHttpClient = new OkHttpClient();
     private Button submitButton;
+
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,6 +60,7 @@ public class llm extends BaseActivity {
                 if(!inputText.isEmpty()){
                     // Show the text in a Toast message
                     try {
+                        login.mAuth.getCurrentUser();
                         OpenAiTask openAiTask = new OpenAiTask();
                         Thread thread = new Thread(openAiTask);
                         thread.start();
@@ -93,5 +101,38 @@ public class llm extends BaseActivity {
         public String getValue() {
             return output;
         }
+    }
+
+    private void fetchTopTracksJsonStringFromFirebase() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        FirebaseUser currentUser = login.mAuth.getCurrentUser();
+
+        if (currentUser == null) {
+            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String userId = currentUser.getUid();
+        DocumentReference docRef = db.collection("users").document(userId);
+
+        docRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document != null && document.exists()) {
+                    // Extract the topTracksJsonString from the document
+                    String topTracksJsonString = document.getString("topTracksJsonString");
+                    if (topTracksJsonString != null) {
+                        // Do something with the topTracksJsonString, for example:
+                        Log.d("Firebase", "Top Tracks JSON: " + topTracksJsonString);
+                    } else {
+                    }
+                } else {
+                }
+            } else {
+                Log.d("Firebase", "Error getting document: ", task.getException());
+            }
+        }).addOnFailureListener(e -> {
+            Log.e("Firebase", "Error fetching topTracksJsonString", e);
+        });
     }
 }
