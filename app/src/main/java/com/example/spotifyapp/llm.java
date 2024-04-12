@@ -60,6 +60,7 @@ public class llm extends BaseActivity {
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Toast.makeText(llm.this, "Sent the request!", Toast.LENGTH_LONG).show();
                 try {
                     login.mAuth.getCurrentUser();
                     OpenAiTask openAiTask = new OpenAiTask();
@@ -71,7 +72,7 @@ public class llm extends BaseActivity {
                     Log.d("hello", value);
                     Log.d("hello2", topTracksJsonString);
                 } catch (Exception e) {
-                    Toast.makeText(llm.this, "bad", Toast.LENGTH_LONG).show();
+                    Toast.makeText(llm.this, "An issue occurred.", Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -83,22 +84,28 @@ public class llm extends BaseActivity {
 
         @Override
         public void run() {
-            String systemPrompt = "You are a helpful assistant whose purpose is to predict the way a user thinks, acts, and dresses based on their music tastes. Format the response in an engaging and terse format, and write concisely. Do not be generic.";
+            String systemPrompt = "You are a helpful assistant whose purpose is to predict the way a user thinks, acts, and dresses based on their music tastes. Format the response in an engaging and terse format, and write concisely. Do not be generic. ";
             String userPrompt = "Here is my songs data: " + topTracksJsonString + "Given that data, please dynamically describe the way you think I act, think, and dress based on my music taste?";
             ArrayList<ChatMessage> messages = new ArrayList<>();
             messages.add(new ChatMessage("system", systemPrompt));
             messages.add(new ChatMessage("user", userPrompt));
-            //put key
-            OpenAiService service = new OpenAiService("");
-            ChatCompletionRequest completionRequest = ChatCompletionRequest.builder()
-                    .messages(messages)
-                    .model("gpt-4-turbo-preview")
-                    .maxTokens(4096)
-                    .build();
-            List<ChatCompletionChoice> choices = service.createChatCompletion(completionRequest).getChoices();
-            for (ChatCompletionChoice choice : choices) {
-                output += choice.getMessage().getContent();
+            try {
+                //put key
+                OpenAiService service = new OpenAiService("");
+                ChatCompletionRequest completionRequest = ChatCompletionRequest.builder()
+                        .messages(messages)
+                        .model("gpt-4-turbo-preview")
+                        .maxTokens(4096)
+                        .build();
+                List<ChatCompletionChoice> choices = service.createChatCompletion(completionRequest).getChoices();
+                for (ChatCompletionChoice choice : choices) {
+                    output += choice.getMessage().getContent();
+                }
+            } catch (Exception e) {
+                output = "Try again please!";
+                Log.e("error", e.getMessage());
             }
+
         }
 
         public String getValue() {
