@@ -18,6 +18,11 @@
             android:id="@+id/sign_up_item"
             android:icon="@drawable/ic_launcher_background"
             android:title="@string/item_title4" />
+
+        <item
+            android:id="@+id/llm_item"
+            android:icon="@drawable/ic_launcher_background"
+            android:title="@string/llm" />
         <!-- Add more items as needed -->
     </group>
 </menu>

@@ -11,4 +11,5 @@
     <string name="sign_out">Sign Out</string>
     <string name="item_title4">Sign Up</string>
     <string name="sign_up_button_text">Sign Up</string>
+    <string name="llm">LLM</string>
 </resources>
