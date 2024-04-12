@@ -37,10 +37,13 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 
 public class wrapped extends BaseActivity {
+
 
     private final OkHttpClient mOkHttpClient = new OkHttpClient();
     private TextView songName1, songName2, songName3;
@@ -65,66 +68,53 @@ public class wrapped extends BaseActivity {
         playButton1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                playSong(0); // Assuming 0 is the index of the first song in your list
+                //playSong(0); // Assuming 0 is the index of the first song in your list
             }
         });
 
         // Repeat for playButton2 and playButton3
     }
 
-    private void playSong(int songIndex) {
-        // Use the Spotify Web API to play the song at the given index
-        // You will need the song's URI, which you can get from the top tracks JSON
-        // Example: "spotify:track:3n3Ppam7vgaVa1iaRUc9Lp"
-        String songUri = "spotify:track:..."; // Replace with the actual URI
 
-        Request request = new Request.Builder()
-                .url("https://api.spotify.com/v1/me/top/tracks?limit=3")
-                .addHeader("Authorization", "Bearer " + getmAccessToken())
-                .build();
+        private void fetchAccessTokenFromFirebase() {
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            FirebaseUser currentUser = login.mAuth.getCurrentUser();
 
-        try {
-            Response response = mOkHttpClient.newCall(request).execute();
-            if (response.isSuccessful()) {
-                String responseBody = response.body().string();
-                JSONObject jsonObject = new JSONObject(responseBody);
-                JSONArray itemsArray = jsonObject.getJSONArray("items");
-
-                if (songIndex < itemsArray.length()) {
-                    JSONObject trackObject = itemsArray.getJSONObject(songIndex);
-                    songUri = trackObject.getString("uri");
-
-                    // Play the song with the fetched URI
-                    Request playRequest = new Request.Builder()
-                            .url("https://api.spotify.com/v1/me/player/play")
-                            .addHeader("Authorization", "Bearer " + getmAccessToken())
-                            .post(RequestBody.create("{\"uris\": [\"" + songUri + "\"]}", MediaType.parse("application/json")))
-                            .build();
-
-                    mOkHttpClient.newCall(playRequest).enqueue(new Callback() {
-                        @Override
-                        public void onFailure(Call call, IOException e) {
-                            // Handle failure
-                        }
-
-                        @Override
-                        public void onResponse(Call call, Response response) throws IOException {
-                            // Handle response
-                        }
-                    });
-                } else {
-                    Toast.makeText(this, "Song index out of range", Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                Toast.makeText(this, "Failed to fetch top tracks", Toast.LENGTH_SHORT).show();
+            if (currentUser == null) {
+                Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
+                return;
             }
-        } catch (IOException | JSONException e) {
-            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+
+            String userId = currentUser.getUid();
+            DocumentReference docRef = db.collection("users").document(userId);
+
+            docRef.get().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document != null && document.exists()) {
+                        // Extract the access token from the document
+                        String accessToken = document.getString("accessToken");
+                        if (accessToken != null) {
+                            // Do something with the accessToken, for example:
+                            Log.d("Firebase", "Access Token: " + accessToken);
+                            Toast.makeText(wrapped.this, "Access Token: " + accessToken, Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(wrapped.this, "Access Token not found", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(wrapped.this, "Document does not exist", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(wrapped.this, "Failed to fetch access token: " + task.getException(), Toast.LENGTH_SHORT).show();
+                    Log.d("Firebase", "Error getting document: ", task.getException());
+                }
+            }).addOnFailureListener(e -> {
+                Toast.makeText(wrapped.this, "Error fetching from Firestore: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("Firebase", "Error fetching accessToken", e);
+            });
         }
 
-        // Execute the request to play the song
-        // Note: You need a Spotify Premium account to use the play endpoint
-    }
+
 
     // Update the TextViews with the song names when you fetch the top tracks
     private void updateSongNames() {
