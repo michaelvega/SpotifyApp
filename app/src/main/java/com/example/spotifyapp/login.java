@@ -62,6 +62,8 @@ public class login extends BaseActivity {
     private JSONObject topTracksJson;
 
     private String topTracksJsonString;
+
+    private String topThreeLong, topThreeMedium, topThreeShort;
     private Call mCall;
 
     public static FirebaseAuth mAuth;
@@ -213,48 +215,104 @@ public class login extends BaseActivity {
     }
 
     private void fetchMusicListeningHabits() {
-        // Here, we'll pretend we're fetching "Top Tracks" as an example
-        // You would replace this with the actual data fetching and analysis logic
         if (getmAccessToken() == null) {
             Toast.makeText(this, "Access Token not available", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        final Request request = new Request.Builder()
-                .url("https://api.spotify.com/v1/me/top/tracks?fields=items(uri,name,album(name,href),artists(name,href))")
-                .addHeader("Authorization", "Bearer " + getmAccessToken())
-                .build();
+        // Define the time ranges for which you want to fetch the top tracks
+        String[] timeRanges = {"long_term", "medium_term", "short_term"};
 
-        mOkHttpClient.newCall(request).enqueue(new Callback() {
+        for (String timeRange : timeRanges) {
+            String url = "https://api.spotify.com/v1/me/top/tracks?fields=items(uri,name,album(name,href),artists(name,href))&time_range=" + timeRange + "&limit=3";
+
+            Request request = new Request.Builder()
+                    .url(url)
+                    .addHeader("Authorization", "Bearer " + getmAccessToken())
+                    .build();
+
+            mOkHttpClient.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    Log.e("Spotify API", "Failed to fetch top tracks for time range: " + timeRange, e);
+                    // Handle error, possibly update UI thread with Toast
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    if (response.isSuccessful()) {
+                        final String responseBody = response.body().string();
+                        Log.d("top tracks", responseBody);
+
+                        try {
+                            JSONObject jsonObject = new JSONObject(responseBody);
+                            JSONArray items = jsonObject.getJSONArray("items");
+                            JSONArray tracksJsonArray = new JSONArray();  // Array to hold JSON objects for each track
+
+                            for (int i = 0; i < items.length(); i++) {
+                                JSONObject track = items.getJSONObject(i);
+                                // Get track name
+                                String trackName = track.getString("name");
+                                // Get track URI (Assuming the URI is a property of the track object, adjust if it's nested deeper)
+                                String trackUri = track.getString("uri");
+
+                                // Create a new JSON object and put the track name and URI into it
+                                JSONObject trackJson = new JSONObject();
+                                trackJson.put("name", trackName);
+                                trackJson.put("uri", trackUri);
+
+                                // Add the JSON object to the JSON array
+                                tracksJsonArray.put(trackJson);
+                            }
+
+                            // Convert the JSON array to string if needed or directly use it
+                            final String tracksJsonString = tracksJsonArray.toString();
+
+                            runOnUiThread(() -> {
+                                switch (timeRange) {
+                                    case "long_term":
+                                        topThreeLong = tracksJsonString;
+                                        break;
+                                    case "medium_term":
+                                        topThreeMedium = tracksJsonString;
+                                        break;
+                                    case "short_term":
+                                        topThreeShort = tracksJsonString;
+                                        break;
+                                }
+                                // Optional: Update the UI here if necessary
+                            });
+
+                        } catch (JSONException e) {
+                            Log.e("JSON parsing", "Failed to parse JSON", e);
+                            // Handle the error gracefully, possibly update UI thread with Toast
+                        }
+                    } else {
+                        Log.e("HTTP error", "Server responded with error for time range: " + timeRange);
+                        // Handle HTTP error, possibly update UI thread with Toast
+                    }
+                }
+            });
+        }
+
+        String urlAllTime = "https://api.spotify.com/v1/me/top/tracks?fields=items(name,album(name,href),artists(name,href))"; // Adjust limit as necessary
+     
+        mOkHttpClient.newCall(requestAllTime).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                Log.e("Spotify API", "Failed to fetch top tracks", e);
+                Log.e("Spotify API", "Failed to fetch all top tracks", e);
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     final String responseBody = response.body().string();
-                    Log.d("top tracks", responseBody);
-
-                    try {
-                        // Parse the raw JSON string into a JSONObject
-                        topTracksJson = new JSONObject(responseBody);
-
-                        // Convert the JSONObject back into a string with indentation (for readability)
-                        topTracksJsonString = topTracksJson.toString(4); // Argument is the number of spaces to indent
-
-                        // Update the TextView with the formatted JSON string
-                        setTextAsync(topTracksJsonString, musicListeningText);
-                    } catch (JSONException e) {
-                        Log.e("JSON parsing", "Failed to parse JSON", e);
-                        // Handle the error gracefully, perhaps show an error message to the user
-                        setTextAsync("Failed to parse JSON data. Check logs for details.", musicListeningText);
-                    }
+                    topTracksJsonString = responseBody.toString(); // Storing the entire response
+                    Log.d("All Top Tracks", responseBody);
+                    // Optionally parse and update UI here
+                    runOnUiThread(() -> setTextAsync(topTracksJsonString, musicListeningText));
                 } else {
-                    Log.e("HTTP error", "Server responded with error");
-                    // Handle HTTP error, perhaps show an error message to the user
-                    setTextAsync("Failed to fetch data. Server responded with error.", musicListeningText);
+                    Log.e("HTTP error", "Server responded with error while fetching all top tracks");
                 }
             }
         });
@@ -278,8 +336,16 @@ public class login extends BaseActivity {
         }
 
         Map<String, Object> yearlyInfo = new HashMap<>();
-        yearlyInfo.put("topTracks", topTracksJsonString); // Saving as a JSON string
-        yearlyInfo.put("year", year); // Adding the year field
+        yearlyInfo.put("topThreeTracks", topThreeLong); // Saving as a JSON string
+        yearlyInfo.put("timeRange", "pastYear"); // Adding the year field
+
+        Map<String, Object> monthlyInfo = new HashMap<>();
+        monthlyInfo.put("topThreeTracks", topThreeMedium); // Saving as a JSON string
+        monthlyInfo.put("timeRange", "pastSixMonths"); // Adding the year field
+
+        Map<String, Object> weeklyInfo = new HashMap<>();
+        weeklyInfo.put("topThreeTracks", topThreeShort); // Saving as a JSON string
+        weeklyInfo.put("timeRange", "pastFourWeeks"); // Adding the year field
 
         // Get an instance of the Firestore database
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -288,12 +354,17 @@ public class login extends BaseActivity {
         String userId = user.getUid();
 
         DocumentReference userProfileRef = db.collection("users").document(userId);
-        DocumentReference yearlyTopTracksRef = userProfileRef.collection("yearlyTopTracks").document(String.valueOf(year));
+        DocumentReference yearlyTopTracksRef = userProfileRef.collection("yearlyTopTracks").document("pastYear");
+        DocumentReference monthlyTopTracksRef = userProfileRef.collection("monthlyTopTracks").document("pastSixMonths");
+        DocumentReference weeklyTopTracksRef = userProfileRef.collection("weeklyTopTracks").document("pastFourWeeks");
+
 
 
         WriteBatch batch = db.batch();
         batch.set(userProfileRef, userProfile); // Update the user profile
         batch.set(yearlyTopTracksRef, yearlyInfo); // Add or update the yearly top tracks
+        batch.set(monthlyTopTracksRef, monthlyInfo);
+        batch.set(weeklyTopTracksRef, weeklyInfo);
 
 
         if ( userProfile.getAccessToken() != null && userProfile.getAccessCode() != null && userProfile.getProfileInfo() != null && userProfile.getSpotifyEmail() != null && userProfile.getTopTracksJsonString() != null){
