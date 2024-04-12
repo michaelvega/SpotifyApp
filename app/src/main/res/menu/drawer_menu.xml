@@ -9,10 +9,7 @@
             android:id="@+id/home_item"
             android:icon="@drawable/ic_launcher_background"
             android:title="@string/item_title2" />
-        <item
-            android:id="@+id/portal_item"
-            android:icon="@drawable/ic_launcher_background"
-            android:title="@string/item_title3" />
+
 
         <item
             android:id="@+id/sign_up_item"
@@ -24,10 +21,7 @@
             android:icon="@drawable/ic_launcher_background"
             android:title="@string/llm" />
 
-        <item
-            android:id="@+id/wrapped_item"
-            android:icon="@drawable/ic_launcher_background"
-            android:title="@string/wrapped" />
+
 
         <item
             android:id="@+id/pastwrapped_item"

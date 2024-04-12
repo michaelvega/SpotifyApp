@@ -31,7 +31,7 @@ public class SignUp extends BaseActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-        initializeDrawer();
+        //initializeDrawer();
         setupLoginForm();
     }
 
@@ -97,6 +97,7 @@ public class SignUp extends BaseActivity {
             Toast.makeText(SignUp.this, "Your user ID is: " + userId,
                     Toast.LENGTH_SHORT).show();
             Log.d("userid", userId);
+            initializeDrawer();
         } else {
 
             Toast.makeText(SignUp.this, "Signed Out",

@@ -1,9 +1,9 @@
 <resources>
     <string name="app_name">SpotifyApp</string>
-    <string name="item_title1">Login</string>
+    <string name="item_title1">Spotify Sync</string>
     <string name="navigation_drawer_open">Open Drawer</string>
     <string name="navigation_drawer_close">Close Drawer</string>
-    <string name="item_title2">Home</string>
+    <string name="item_title2">Sign In</string>
     <string name="item_title3">Portal</string>
     <string name="username_hint">Username</string>
     <string name="password_hint">Password</string>
@@ -14,5 +14,5 @@
     <string name="llm">LLM</string>
     <string name="wrapped">wrapped</string>
     <string name="pastwrapped">View Wrapped</string>
-    <string name="account">account</string>
+    <string name="account">Update Account</string>
 </resources>
