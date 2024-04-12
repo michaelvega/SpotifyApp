@@ -1,21 +1,19 @@
 package com.example.spotifyapp;
 
-
 import android.os.AsyncTask;
 import android.os.Bundle;
 
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
-
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.api.SystemParameterOrBuilder;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -23,21 +21,26 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.theokanning.openai.completion.CompletionChoice;
 import com.theokanning.openai.completion.CompletionRequest;
+import com.theokanning.openai.completion.chat.ChatCompletionChoice;
+import com.theokanning.openai.completion.chat.ChatCompletionRequest;
+import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.service.OpenAiService;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 import java.util.List;
-
-import okhttp3.OkHttpClient;
-
 
 public class llm extends BaseActivity {
 
-    private EditText inputEditText;
+    private TextView llmOutput;
 
-    private final OkHttpClient mOkHttpClient = new OkHttpClient();
     private Button submitButton;
 
-
+    private static String topTracksJsonString = "";
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
 
     @Override
@@ -47,33 +50,28 @@ public class llm extends BaseActivity {
 
         initializeDrawer();
 
-        inputEditText = findViewById(R.id.input);
+        llmOutput = findViewById(R.id.llmOutput);
         submitButton = findViewById(R.id.submit);
+
+        if (login.mAuth.getCurrentUser() != null) {
+            this.fetchTopTracksJsonStringFromFirebase();
+        }
 
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Get the text from the EditText
-                String inputText = inputEditText.getText().toString();
-
-                // Check if the input text is not empty
-                if(!inputText.isEmpty()){
-                    // Show the text in a Toast message
-                    try {
-                        login.mAuth.getCurrentUser();
-                        OpenAiTask openAiTask = new OpenAiTask();
-                        Thread thread = new Thread(openAiTask);
-                        thread.start();
-                        thread.join();
-                        String value = openAiTask.getValue();
-                        Toast.makeText(llm.this, value, Toast.LENGTH_LONG).show();
-                    } catch (Exception e) {
-                        Toast.makeText(llm.this, "bad", Toast.LENGTH_LONG).show();
-
-                    }
-                } else {
-                    // Inform the user that the input is empty
-                    Toast.makeText(llm.this, "Please enter some text!", Toast.LENGTH_LONG).show();
+                try {
+                    login.mAuth.getCurrentUser();
+                    OpenAiTask openAiTask = new OpenAiTask();
+                    Thread thread = new Thread(openAiTask);
+                    thread.start();
+                    thread.join();
+                    String value = openAiTask.getValue();
+                    llmOutput.setText(value);
+                    Log.d("hello", value);
+                    Log.d("hello2", topTracksJsonString);
+                } catch (Exception e) {
+                    Toast.makeText(llm.this, "bad", Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -85,16 +83,21 @@ public class llm extends BaseActivity {
 
         @Override
         public void run() {
-            // put key
+            String systemPrompt = "You are a helpful assistant whose purpose is to predict the way a user thinks, acts, and dresses based on their music tastes. Format the response in an engaging and terse format, and write concisely. Do not be generic.";
+            String userPrompt = "Here is my songs data: " + topTracksJsonString + "Given that data, please dynamically describe the way you think I act, think, and dress based on my music taste?";
+            ArrayList<ChatMessage> messages = new ArrayList<>();
+            messages.add(new ChatMessage("system", systemPrompt));
+            messages.add(new ChatMessage("user", userPrompt));
+            //put key
             OpenAiService service = new OpenAiService("");
-            CompletionRequest completionRequest = CompletionRequest.builder()
-                    .prompt("You are a helpful assistant whose purpose is to predict the way a user thinks, acts, and dresses based on their music tastes. You must format your response in JSON. Given that I enjoy listening to {songs}, please dynamically describe the way you think I act, think, and dress based on my music taste?")
-                    .model("gpt-3.5-turbo-instruct")
-                    .echo(true)
+            ChatCompletionRequest completionRequest = ChatCompletionRequest.builder()
+                    .messages(messages)
+                    .model("gpt-4-turbo-preview")
+                    .maxTokens(4096)
                     .build();
-            List<CompletionChoice> choices = service.createCompletion(completionRequest).getChoices();
-            for (CompletionChoice choice : choices) {
-                output += choice.getText();
+            List<ChatCompletionChoice> choices = service.createChatCompletion(completionRequest).getChoices();
+            for (ChatCompletionChoice choice : choices) {
+                output += choice.getMessage().getContent();
             }
         }
 
@@ -104,35 +107,38 @@ public class llm extends BaseActivity {
     }
 
     private void fetchTopTracksJsonStringFromFirebase() {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        FirebaseUser currentUser = login.mAuth.getCurrentUser();
-
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser == null) {
-            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
             return;
         }
-
         String userId = currentUser.getUid();
-        DocumentReference docRef = db.collection("users").document(userId);
-
-        docRef.get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                DocumentSnapshot document = task.getResult();
-                if (document != null && document.exists()) {
-                    // Extract the topTracksJsonString from the document
-                    String topTracksJsonString = document.getString("topTracksJsonString");
-                    if (topTracksJsonString != null) {
-                        // Do something with the topTracksJsonString, for example:
-                        Log.d("Firebase", "Top Tracks JSON: " + topTracksJsonString);
-                    } else {
+        DocumentReference yearlyTopTracksRef = db.collection("users").document(userId).collection("yearlyTopTracks").document("pastYear");
+        yearlyTopTracksRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if (documentSnapshot.exists()) {
+                    String topTracksData = documentSnapshot.getString("topThreeTracks");
+                    if (topTracksData != null) {
+                        try {
+                            JSONArray topTracksArray = new JSONArray(topTracksData);
+                            StringBuilder toastTextBuilder = new StringBuilder();
+                            for (int i = 0; i < topTracksArray.length(); i++) {
+                                JSONObject trackObj = topTracksArray.getJSONObject(i);
+                                String name = trackObj.getString("name");
+                                toastTextBuilder.append("Name: ").append(name).append("\n\n");
+                            }
+                            topTracksJsonString = toastTextBuilder.toString();
+                        } catch (JSONException e) {
+                            Log.e("JSON", "Failed to parse top tracks data", e);
+                        }
                     }
-                } else {
                 }
-            } else {
-                Log.d("Firebase", "Error getting document: ", task.getException());
             }
-        }).addOnFailureListener(e -> {
-            Log.e("Firebase", "Error fetching topTracksJsonString", e);
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e("Firestore", "Error getting documents: ", e);
+            }
         });
     }
 }
