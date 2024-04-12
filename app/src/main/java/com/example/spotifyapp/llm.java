@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -33,10 +34,12 @@ import okhttp3.OkHttpClient;
 public class llm extends BaseActivity {
 
     private EditText inputEditText;
+    private TextView llmOutput;
 
     private final OkHttpClient mOkHttpClient = new OkHttpClient();
     private Button submitButton;
 
+    private String topTracksJsonString;
 
 
 
@@ -48,7 +51,12 @@ public class llm extends BaseActivity {
         initializeDrawer();
 
         inputEditText = findViewById(R.id.input);
+        llmOutput = findViewById(R.id.llmOutput);
         submitButton = findViewById(R.id.submit);
+
+        if (login.mAuth.getCurrentUser() != null) {
+            this.fetchTopTracksJsonStringFromFirebase();
+        }
 
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -66,7 +74,9 @@ public class llm extends BaseActivity {
                         thread.start();
                         thread.join();
                         String value = openAiTask.getValue();
-                        Toast.makeText(llm.this, value, Toast.LENGTH_LONG).show();
+//                        Toast.makeText(llm.this, value, Toast.LENGTH_LONG).show();
+                        llmOutput.setText(value);
+                        Log.d("hello", value);
                     } catch (Exception e) {
                         Toast.makeText(llm.this, "bad", Toast.LENGTH_LONG).show();
 
@@ -82,20 +92,22 @@ public class llm extends BaseActivity {
 
     public static class OpenAiTask implements Runnable {
         private String output = "";
-
         @Override
         public void run() {
             // put key
+            String prompt = "You are a helpful assistant whose purpose is to predict the way a user thinks, acts, and dresses based on their music tastes. Format the response in an engaging paragraph. Here is my songs data: " + topTracksJsonString + "Given that data, please dynamically describe the way you think I act, think, and dress based on my music taste?";
             OpenAiService service = new OpenAiService("");
             CompletionRequest completionRequest = CompletionRequest.builder()
-                    .prompt("You are a helpful assistant whose purpose is to predict the way a user thinks, acts, and dresses based on their music tastes. You must format your response in JSON. Given that I enjoy listening to {songs}, please dynamically describe the way you think I act, think, and dress based on my music taste?")
-                    .model("gpt-3.5-turbo-instruct")
+                    .prompt(prompt)
+                    .model("babbage-002")
                     .echo(true)
+                    .maxTokens(10000)
                     .build();
             List<CompletionChoice> choices = service.createCompletion(completionRequest).getChoices();
             for (CompletionChoice choice : choices) {
                 output += choice.getText();
             }
+
         }
 
         public String getValue() {
@@ -115,12 +127,13 @@ public class llm extends BaseActivity {
         String userId = currentUser.getUid();
         DocumentReference docRef = db.collection("users").document(userId);
 
+
         docRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 DocumentSnapshot document = task.getResult();
                 if (document != null && document.exists()) {
                     // Extract the topTracksJsonString from the document
-                    String topTracksJsonString = document.getString("topTracksJsonString");
+                    topTracksJsonString = document.getString("topTracksJsonString");
                     if (topTracksJsonString != null) {
                         // Do something with the topTracksJsonString, for example:
                         Log.d("Firebase", "Top Tracks JSON: " + topTracksJsonString);
