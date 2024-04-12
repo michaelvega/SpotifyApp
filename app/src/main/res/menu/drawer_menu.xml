@@ -28,6 +28,11 @@
             android:id="@+id/wrapped_item"
             android:icon="@drawable/ic_launcher_background"
             android:title="@string/wrapped" />
+
+        <item
+            android:id="@+id/pastwrapped_item"
+            android:icon="@drawable/ic_launcher_background"
+            android:title="@string/pastwrapped" />
         <!-- Add more items as needed -->
     </group>
 </menu>
