@@ -21,6 +21,8 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected Toolbar toolbar;
     protected NavigationView navigationView;
 
+    private String mAccessToken;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,5 +76,13 @@ public abstract class BaseActivity extends AppCompatActivity {
             }
             return true;
         });
+    }
+
+    public String getmAccessToken() {
+        return mAccessToken;
+    }
+
+    public void setmAccessToken(String mAccessToken) {
+        this.mAccessToken = mAccessToken;
     }
 }
