@@ -1,6 +1,7 @@
 package com.example.spotifyapp;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import android.util.Log;
@@ -22,6 +23,7 @@ public class SignUp extends BaseActivity {
     private Button signUpButton;
 
     private Button signOutButton;
+    private Button signInButton;
     private FirebaseAuth mAuth;
 
     @Override
@@ -40,6 +42,7 @@ public class SignUp extends BaseActivity {
         passwordEditText = findViewById(R.id.password);
         signUpButton = findViewById(R.id.sign_up_button);
         signOutButton = findViewById(R.id.signout_button);
+        signInButton = findViewById(R.id.login_button);
 
         signUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -56,6 +59,15 @@ public class SignUp extends BaseActivity {
                 } else {
                     Toast.makeText(SignUp.this, "Please enter both email and password.", Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+
+        signInButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(SignUp.this, MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // Clear the activity stack
+                startActivity(intent);
             }
         });
 
@@ -78,6 +90,9 @@ public class SignUp extends BaseActivity {
                         updateUI(user);
                         Toast.makeText(SignUp.this, "Registration successful.",
                                 Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(SignUp.this, login.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // Clear the activity stack
+                        startActivity(intent);
                     } else {
                         // If sign in fails, display a message to the user.
                         Log.w("SignUp", "createUserWithEmail:failure", task.getException());

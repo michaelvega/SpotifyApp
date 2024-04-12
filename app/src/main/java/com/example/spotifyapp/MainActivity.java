@@ -97,6 +97,9 @@ public class MainActivity extends BaseActivity {
                         Log.d("SignIn", "signInWithEmail:success");
                         FirebaseUser user = mAuth.getCurrentUser();
                         updateUI(user);
+                        Intent intent = new Intent(MainActivity.this, login.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // Clear the activity stack
+                        startActivity(intent);
                     } else {
                         // If sign in fails, display a message to the user.
                         Log.w("SignIn", "signInWithEmail:failure", task.getException());

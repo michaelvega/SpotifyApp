@@ -1,5 +1,6 @@
 package com.example.spotifyapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Patterns;
@@ -18,8 +19,15 @@ public class account extends BaseActivity {
 
     private EditText newEmailInput;
 
+    private Button signOutButton;
+    FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.account);
         initializeDrawer();
@@ -27,6 +35,18 @@ public class account extends BaseActivity {
         newEmailInput = findViewById(R.id.new_email_input);
 
         deleteAccountBtn = findViewById(R.id.delete_account_btn);
+
+        signOutButton = findViewById(R.id.signout_button);
+
+        signOutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mAuth.signOut();
+                Intent intent = new Intent(account.this, MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // Clear the activity stack
+                startActivity(intent);
+            }
+        });
         deleteAccountBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -45,8 +65,6 @@ public class account extends BaseActivity {
     }
 
     private void updateAccountEmail() {
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         if (mAuth.getCurrentUser() != null) {
             // Get the email entered by the user
