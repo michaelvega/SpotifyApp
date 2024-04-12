@@ -80,7 +80,7 @@ public class llm extends BaseActivity {
 
     }
 
-    private class OpenAiTask implements Runnable {
+    public static class OpenAiTask implements Runnable {
         private String output = "";
 
         @Override
