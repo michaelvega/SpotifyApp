@@ -55,13 +55,17 @@ public abstract class BaseActivity extends AppCompatActivity {
             } else if (itemId == R.id.llm_item && !(this instanceof llm)) {
                 Intent intent = new Intent(this, llm.class);
                 startActivity(intent);
+            } else if (itemId == R.id.wrapped_item && !(this instanceof wrapped)) {
+                Intent intent = new Intent(this, wrapped.class);
+                startActivity(intent);
             }
 
             if ((itemId == R.id.login_item && !(this instanceof login)) ||
                     (itemId == R.id.home_item && !(this instanceof MainActivity))
                     || (itemId == R.id.portal_item && !(this instanceof portal))
                     || (itemId == R.id.sign_up_item && !(this instanceof SignUp))
-                    || (itemId == R.id.llm_item && !(this instanceof llm)) ) {
+                    || (itemId == R.id.llm_item && !(this instanceof llm))
+                    || (itemId == R.id.wrapped_item && !(this instanceof wrapped))) {
                 drawer.closeDrawer(GravityCompat.START);
             }
             return true;
