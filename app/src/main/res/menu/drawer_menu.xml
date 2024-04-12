@@ -33,6 +33,11 @@
             android:id="@+id/pastwrapped_item"
             android:icon="@drawable/ic_launcher_background"
             android:title="@string/pastwrapped" />
+
+        <item
+            android:id="@+id/account_item"
+            android:icon="@drawable/ic_launcher_background"
+            android:title="@string/account" />
         <!-- Add more items as needed -->
     </group>
 </menu>

@@ -63,6 +63,9 @@ public abstract class BaseActivity extends AppCompatActivity {
             } else if (itemId == R.id.pastwrapped_item && !(this instanceof pastwrapped)) {
                 Intent intent = new Intent(this, pastwrapped.class);
                 startActivity(intent);
+            } else if (itemId == R.id.account_item && !(this instanceof account)) {
+                Intent intent = new Intent(this, account.class);
+                startActivity(intent);
             }
 
             if ((itemId == R.id.login_item && !(this instanceof login)) ||
@@ -71,7 +74,8 @@ public abstract class BaseActivity extends AppCompatActivity {
                     || (itemId == R.id.sign_up_item && !(this instanceof SignUp))
                     || (itemId == R.id.llm_item && !(this instanceof llm))
                     || (itemId == R.id.wrapped_item && !(this instanceof wrapped))
-                    || (itemId == R.id.pastwrapped_item && !(this instanceof pastwrapped)) ) {
+                    || (itemId == R.id.pastwrapped_item && !(this instanceof pastwrapped))
+                    || (itemId == R.id.account_item && !(this instanceof account))) {
                 drawer.closeDrawer(GravityCompat.START);
             }
             return true;

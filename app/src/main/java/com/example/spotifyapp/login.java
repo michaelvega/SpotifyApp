@@ -296,11 +296,7 @@ public class login extends BaseActivity {
         }
 
         String urlAllTime = "https://api.spotify.com/v1/me/top/tracks?fields=items(name,album(name,href),artists(name,href))"; // Adjust limit as necessary
-        Request requestAllTime = new Request.Builder()
-                .url(urlAllTime)
-                .addHeader("Authorization", "Bearer " + getmAccessToken())
-                .build();
-
+     
         mOkHttpClient.newCall(requestAllTime).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
