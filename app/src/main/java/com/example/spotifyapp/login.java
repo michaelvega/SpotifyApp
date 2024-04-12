@@ -56,6 +56,7 @@ public class login extends BaseActivity {
     private final OkHttpClient mOkHttpClient = new OkHttpClient();
     private String mAccessCode;
 
+
     private String spotifyEmail;
 
     private JSONObject topTracksJson;
@@ -63,7 +64,7 @@ public class login extends BaseActivity {
     private String topTracksJsonString;
     private Call mCall;
 
-    private FirebaseAuth mAuth;
+    public static FirebaseAuth mAuth;
 
     private TextView tokenTextView, codeTextView, profileTextView;
 
@@ -365,4 +366,6 @@ public class login extends BaseActivity {
         cancelCall();
         super.onDestroy();
     }
+
+
 }

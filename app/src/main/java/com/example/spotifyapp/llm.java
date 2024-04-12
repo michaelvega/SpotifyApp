@@ -1,8 +1,10 @@
 package com.example.spotifyapp;
 
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -13,15 +15,31 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.api.SystemParameterOrBuilder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.theokanning.openai.completion.CompletionChoice;
+import com.theokanning.openai.completion.CompletionRequest;
+import com.theokanning.openai.service.OpenAiService;
 
+import java.util.List;
+
+import okhttp3.OkHttpClient;
 
 
 public class llm extends BaseActivity {
 
     private EditText inputEditText;
+
+    private final OkHttpClient mOkHttpClient = new OkHttpClient();
     private Button submitButton;
+
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,7 +59,18 @@ public class llm extends BaseActivity {
                 // Check if the input text is not empty
                 if(!inputText.isEmpty()){
                     // Show the text in a Toast message
-                    Toast.makeText(llm.this, inputText, Toast.LENGTH_LONG).show();
+                    try {
+                        login.mAuth.getCurrentUser();
+                        OpenAiTask openAiTask = new OpenAiTask();
+                        Thread thread = new Thread(openAiTask);
+                        thread.start();
+                        thread.join();
+                        String value = openAiTask.getValue();
+                        Toast.makeText(llm.this, value, Toast.LENGTH_LONG).show();
+                    } catch (Exception e) {
+                        Toast.makeText(llm.this, "bad", Toast.LENGTH_LONG).show();
+
+                    }
                 } else {
                     // Inform the user that the input is empty
                     Toast.makeText(llm.this, "Please enter some text!", Toast.LENGTH_LONG).show();
@@ -49,5 +78,61 @@ public class llm extends BaseActivity {
             }
         });
 
+    }
+
+    private class OpenAiTask implements Runnable {
+        private String output = "";
+
+        @Override
+        public void run() {
+            // put key
+            OpenAiService service = new OpenAiService("");
+            CompletionRequest completionRequest = CompletionRequest.builder()
+                    .prompt("You are a helpful assistant whose purpose is to predict the way a user thinks, acts, and dresses based on their music tastes. You must format your response in JSON. Given that I enjoy listening to {songs}, please dynamically describe the way you think I act, think, and dress based on my music taste?")
+                    .model("gpt-3.5-turbo-instruct")
+                    .echo(true)
+                    .build();
+            List<CompletionChoice> choices = service.createCompletion(completionRequest).getChoices();
+            for (CompletionChoice choice : choices) {
+                output += choice.getText();
+            }
+        }
+
+        public String getValue() {
+            return output;
+        }
+    }
+
+    private void fetchTopTracksJsonStringFromFirebase() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        FirebaseUser currentUser = login.mAuth.getCurrentUser();
+
+        if (currentUser == null) {
+            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String userId = currentUser.getUid();
+        DocumentReference docRef = db.collection("users").document(userId);
+
+        docRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document != null && document.exists()) {
+                    // Extract the topTracksJsonString from the document
+                    String topTracksJsonString = document.getString("topTracksJsonString");
+                    if (topTracksJsonString != null) {
+                        // Do something with the topTracksJsonString, for example:
+                        Log.d("Firebase", "Top Tracks JSON: " + topTracksJsonString);
+                    } else {
+                    }
+                } else {
+                }
+            } else {
+                Log.d("Firebase", "Error getting document: ", task.getException());
+            }
+        }).addOnFailureListener(e -> {
+            Log.e("Firebase", "Error fetching topTracksJsonString", e);
+        });
     }
 }
