@@ -29,45 +29,23 @@
             app:layout_constraintEnd_toEndOf="parent"
             tools:context=".llm">
 
-            <TextView
-                android:id="@+id/output"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="LLM"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <EditText
-                android:id="@+id/input"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:hint="Ask your question here"
-                android:inputType="textLongMessage"
-                app:layout_constraintTop_toBottomOf="@id/output"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintWidth_percent="0.8"/>
-
             <Button
                 android:id="@+id/submit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Send Message"
-                app:layout_constraintTop_toBottomOf="@id/input"
-                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginBottom="128dp"
+                android:text="Get your insights!"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"/>
+                app:layout_constraintHorizontal_bias="0.498"
+                app:layout_constraintStart_toStartOf="parent" />
 
             <TextView
                 android:id="@+id/llmOutput"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Output"
-                app:layout_constraintBottom_toTopOf="@+id/output"
+                android:layout_marginTop="64dp"
+                android:textSize="10sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
