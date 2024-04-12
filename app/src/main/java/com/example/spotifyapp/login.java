@@ -54,7 +54,7 @@ public class login extends BaseActivity {
     public static final int AUTH_CODE_REQUEST_CODE = 1;
 
     private final OkHttpClient mOkHttpClient = new OkHttpClient();
-    private String mAccessToken, mAccessCode;
+    private String mAccessCode;
 
     private String spotifyEmail;
 
@@ -157,9 +157,9 @@ public class login extends BaseActivity {
 
         // Check which request code is present (if any)
         if (AUTH_TOKEN_REQUEST_CODE == requestCode) {
-            mAccessToken = response.getAccessToken();
-            Log.d("access token", mAccessToken);
-            setTextAsync(mAccessToken, tokenTextView);
+            setmAccessToken(response.getAccessToken());
+            Log.d("access token", getmAccessToken());
+            setTextAsync(getmAccessToken(), tokenTextView);
 
         } else if (AUTH_CODE_REQUEST_CODE == requestCode) {
             mAccessCode = response.getCode();
@@ -172,7 +172,7 @@ public class login extends BaseActivity {
      * This method will get the user profile using the token
      */
     public void onGetUserProfileClicked() {
-        if (mAccessToken == null) {
+        if (getmAccessToken() == null) {
             Toast.makeText(this, "You need to get an access token first!", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -180,7 +180,7 @@ public class login extends BaseActivity {
         // Create a request to get the user profile
         final Request request = new Request.Builder()
                 .url("https://api.spotify.com/v1/me")
-                .addHeader("Authorization", "Bearer " + mAccessToken)
+                .addHeader("Authorization", "Bearer " + getmAccessToken())
                 .build();
 
         cancelCall();
@@ -214,14 +214,14 @@ public class login extends BaseActivity {
     private void fetchMusicListeningHabits() {
         // Here, we'll pretend we're fetching "Top Tracks" as an example
         // You would replace this with the actual data fetching and analysis logic
-        if (mAccessToken == null) {
+        if (getmAccessToken() == null) {
             Toast.makeText(this, "Access Token not available", Toast.LENGTH_SHORT).show();
             return;
         }
 
         final Request request = new Request.Builder()
                 .url("https://api.spotify.com/v1/me/top/tracks?fields=items(name,album(name,href),artists(name,href))")
-                .addHeader("Authorization", "Bearer " + mAccessToken)
+                .addHeader("Authorization", "Bearer " + getmAccessToken())
                 .build();
 
         mOkHttpClient.newCall(request).enqueue(new Callback() {
@@ -269,7 +269,7 @@ public class login extends BaseActivity {
         int year = calendar.get(Calendar.YEAR);
 
         try {
-            userProfile = new UserProfile(mAccessToken, mAccessCode, profileTextView.getText().toString(), spotifyEmail, topTracksJsonString, year);
+            userProfile = new UserProfile(getmAccessToken(), mAccessCode, profileTextView.getText().toString(), spotifyEmail, topTracksJsonString, year);
         } catch (Exception e) {
             // Toast.makeText(this, "A field is incomplete or sync failed", Toast.LENGTH_SHORT).show();
             Log.w("error code: ", e);

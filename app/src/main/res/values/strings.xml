@@ -13,4 +13,5 @@
     <string name="sign_up_button_text">Sign Up</string>
     <string name="llm">LLM</string>
     <string name="wrapped">wrapped</string>
+    <string name="pastwrapped">pastwrapped</string>
 </resources>
