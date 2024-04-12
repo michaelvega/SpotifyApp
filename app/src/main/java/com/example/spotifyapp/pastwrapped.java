@@ -1,6 +1,8 @@
 package com.example.spotifyapp;
 
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import android.util.Log;
@@ -16,13 +18,27 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.spotify.sdk.android.auth.AuthorizationClient;
+import com.spotify.sdk.android.auth.AuthorizationRequest;
+import com.spotify.sdk.android.auth.AuthorizationResponse;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import okhttp3.OkHttpClient;
+
 
 public class pastwrapped extends BaseActivity {
+
+    public static final String CLIENT_ID = "66543f1060f94bde954afafe1e5ce2ae";
+    public static final String REDIRECT_URI = "spotifyapp://auth";
+
+    public static final int AUTH_TOKEN_REQUEST_CODE = 0;
+    public static final int AUTH_CODE_REQUEST_CODE = 1;
+
+    private final OkHttpClient mOkHttpClient = new OkHttpClient();
+    private String mAccessCode;
 
     private TextView songName1, songName2, songName3;
     private Button playButton1, playButton2, playButton3;
@@ -51,6 +67,7 @@ public class pastwrapped extends BaseActivity {
             public void onClick(View v) {
                 // Call the method to fetch and show the data
                 fetchAndShowTimeRangeTopTracks("yearlyTopTracks", "pastYear");
+                getToken();
             }
         });
         monthButton.setOnClickListener(new View.OnClickListener() {
@@ -58,6 +75,7 @@ public class pastwrapped extends BaseActivity {
             public void onClick(View v) {
                 // Call the method to fetch and show the data
                 fetchAndShowTimeRangeTopTracks("monthlyTopTracks", "pastSixMonths");
+                getToken();
             }
         });
         weekButton.setOnClickListener(new View.OnClickListener() {
@@ -65,8 +83,44 @@ public class pastwrapped extends BaseActivity {
             public void onClick(View v) {
                 // Call the method to fetch and show the data
                 fetchAndShowTimeRangeTopTracks("weeklyTopTracks", "pastFourWeeks");
+                getToken();
             }
         });
+    }
+
+    public void getToken() {
+        final AuthorizationRequest request = getAuthenticationRequest(AuthorizationResponse.Type.TOKEN);
+        AuthorizationClient.openLoginActivity(pastwrapped.this, AUTH_TOKEN_REQUEST_CODE, request);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        final AuthorizationResponse response = AuthorizationClient.getResponse(resultCode, data);
+
+        // Check which request code is present (if any)
+        if (AUTH_TOKEN_REQUEST_CODE == requestCode) {
+            setmAccessToken(response.getAccessToken());
+            Log.d("access token", getmAccessToken());
+            // setTextAsync(getmAccessToken(), tokenTextView);
+
+        }
+    }
+
+    private AuthorizationRequest getAuthenticationRequest(AuthorizationResponse.Type type) {
+        return new AuthorizationRequest.Builder(CLIENT_ID, type, getRedirectUri().toString())
+                .setShowDialog(false)
+                .setScopes(new String[] { "user-read-email", "user-top-read" }) // <--- Change the scope of your requested token here
+                .setCampaign("your-campaign-token")
+                .build();
+    }
+
+    private void setTextAsync(final String text, TextView textView) {
+        runOnUiThread(() -> textView.setText(text));
+    }
+
+    private Uri getRedirectUri() {
+        return Uri.parse(REDIRECT_URI);
     }
 
     private void fetchAndShowTimeRangeTopTracks(String collection, String document) {
@@ -127,6 +181,7 @@ public class pastwrapped extends BaseActivity {
     private void playSong(String uri) {
         // Implement the logic to play the song using Spotify SDK or an Intent if possible
         Log.d("PlaySong", "Playing song URI: " + uri);
+        // ADD PLAY HERE
         // For example, to open in Spotify app:
 
     }
