@@ -71,6 +71,8 @@ public class login extends BaseActivity {
     private TextView tokenTextView, codeTextView, profileTextView;
 
     private TextView musicListeningText;
+
+    private TextView directions;
     private Button musicListeningBtn;
 
     @Override
@@ -87,6 +89,7 @@ public class login extends BaseActivity {
         tokenTextView = (TextView) findViewById(R.id.token_text_view);
         codeTextView = (TextView) findViewById(R.id.code_text_view);
         profileTextView = (TextView) findViewById(R.id.response_text_view);
+        directions = findViewById(R.id.directions);
 
         // Initialize the buttons
         Button tokenBtn = (Button) findViewById(R.id.token_btn);
@@ -203,8 +206,8 @@ public class login extends BaseActivity {
                     final JSONObject jsonObject = new JSONObject(response.body().string());
                     spotifyEmail = jsonObject.optString("email", "No spotifyEmail found");
                     final String humanReadableJSON = jsonObject.toString(4);
-                    setTextAsync("Email: " + spotifyEmail + "\n\nData: " + humanReadableJSON, profileTextView);
-                    setTextAsync(humanReadableJSON, profileTextView);
+                    //setTextAsync("Email: " + spotifyEmail + "\n\nData: " + humanReadableJSON, profileTextView);
+                    setTextAsync("Synced!", profileTextView);
                 } catch (JSONException e) {
                     Log.d("JSON", "Failed to parse data: " + e);
                     Toast.makeText(login.this, "Failed to parse data, watch Logcat for more details",
@@ -314,7 +317,7 @@ public class login extends BaseActivity {
                     topTracksJsonString = responseBody.toString(); // Storing the entire response
                     Log.d("All Top Tracks", responseBody);
                     // Optionally parse and update UI here
-                    runOnUiThread(() -> setTextAsync(topTracksJsonString, musicListeningText));
+                    runOnUiThread(() -> setTextAsync("Synced!", musicListeningText));
                 } else {
                     Log.e("HTTP error", "Server responded with error while fetching all top tracks");
                 }

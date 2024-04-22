@@ -105,7 +105,9 @@ public class account extends BaseActivity {
                     // Redirect to login or other appropriate activity
                     finish();
                 } else {
-                    Toast.makeText(account.this, "Failed to delete account: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(account.this, "Gutted user account data: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+
+                    //Toast.makeText(account.this, "Failed to delete account: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                 }
             });
         } else {

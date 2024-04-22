@@ -32,10 +32,21 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class llm extends BaseActivity {
 
+    private FirebaseAuth mAuth;
+
     private TextView llmOutput;
+
+    private TextView loading;
 
     private Button submitButton;
 
@@ -47,13 +58,15 @@ public class llm extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.llm);
+        mAuth = FirebaseAuth.getInstance();
 
         initializeDrawer();
 
         llmOutput = findViewById(R.id.llmOutput);
         submitButton = findViewById(R.id.submit);
+        loading = findViewById(R.id.loading);
 
-        if (login.mAuth.getCurrentUser() != null) {
+        if (mAuth.getCurrentUser() != null) {
             this.fetchTopTracksJsonStringFromFirebase();
         }
 
@@ -61,18 +74,50 @@ public class llm extends BaseActivity {
             @Override
             public void onClick(View v) {
                 Toast.makeText(llm.this, "Sent the request!", Toast.LENGTH_LONG).show();
+
+
+                ExecutorService executorService = Executors.newSingleThreadExecutor();
+                Future<String> future = executorService.submit(new Callable<String>() {
+                    @Override
+                    public String call() throws Exception {
+                        OpenAiTask openAiTask = new OpenAiTask();
+                        openAiTask.run(); // Execute the task in this Callable
+                        return openAiTask.getValue();
+                    }
+                });
+
+                executorService.shutdown(); // Shutdown executor after submitting the task
+
                 try {
-                    login.mAuth.getCurrentUser();
-                    OpenAiTask openAiTask = new OpenAiTask();
-                    Thread thread = new Thread(openAiTask);
-                    thread.start();
-                    thread.join();
-                    String value = openAiTask.getValue();
-                    llmOutput.setText(value);
-                    Log.d("hello", value);
-                    Log.d("hello2", topTracksJsonString);
-                } catch (Exception e) {
-                    Toast.makeText(llm.this, "An issue occurred.", Toast.LENGTH_LONG).show();
+                    // Wait up to 40 seconds for the task to complete and get the result
+                    String value = future.get(40, TimeUnit.SECONDS);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            llmOutput.setText(value);
+                            loading.setText("");
+                            Log.d("hello", value);
+                            Log.d("hello2", topTracksJsonString);
+                        }
+                    });
+                } catch (TimeoutException e) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(llm.this, "Request timed out. Please try again.", Toast.LENGTH_LONG).show();
+                            loading.setText("");
+                            Log.d("llm fail:", "Timeout while waiting for the response");
+                        }
+                    });
+                } catch (InterruptedException | ExecutionException e) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(llm.this, "An issue occurred.", Toast.LENGTH_LONG).show();
+                            loading.setText("");
+                            Log.d("llm fail:", e.toString());
+                        }
+                    });
                 }
             }
         });

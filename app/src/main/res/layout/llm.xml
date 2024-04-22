@@ -44,16 +44,29 @@
 
             <TextView
                 android:id="@+id/llmOutput"
+                android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="60dp"
+            android:layout_marginTop="64dp"
+            android:layout_marginEnd="60dp"
+            android:layout_marginLeft="60dp"
+            android:layout_marginRight="60dp"
+            android:fontFamily="serif"
+            android:textSize="12sp"
+            android:background="@drawable/text_view_background"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/loading"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="60dp"
-                android:layout_marginTop="64dp"
-                android:layout_marginEnd="60dp"
-                android:fontFamily="serif"
-                android:textSize="12sp"
+                android:text="Click and wait for the LLM to output..."
+                app:layout_constraintBottom_toTopOf="@+id/submit"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/llmOutput" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
