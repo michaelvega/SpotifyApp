@@ -4,8 +4,10 @@ Android 33 Tiramisu Frontend Python 3.9.6 Flask Backend hosted on GCP App Engine
 
 [Link to Portfolio Site](https://andregro21.wixsite.com/felipe4project/process-description)
 
-Architecture
+Architecture: 
+
 ![Architecture Image](./res/architecture.png)
 
-Demo 
+Demo: 
+
 ![Demo Image](./res/demoimage.webp)
